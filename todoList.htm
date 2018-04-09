@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="todo">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.bootcss.com/angular.js/1.5.11/angular.min.js"></script>
+	<style type="text/css">
+	ul{
+		list-style:none;
+	}
+	.done-true{
+		text-decoration: line-through;
+		color: #ccc;
+	}
+	#content{
+		background: #f5f5f5;
+	}
+	</style>
+</head>
+<body>	
+	<div ng-controller="todoList"  class="row">
+		<div class="col-sm-offset-4 col-sm-3" id="content">
+			<h2 class="text-center">任务列表</h2>
+			<ul>
+				<li ng-repeat="todo in todos" class="row"><!-- checkbox占两列，输入框或span占10列 -->
+					<div class="col-sm-2">
+						<input type="checkbox" ng-model="todo.done">
+					</div>
+					<div class="col-sm-8">
+						<input type="text" ng-model="todo.text" ng-show="!todo.show" ng-blur="change2($index)" class="form-control"> 
+						<span ng-show="todo.show" class="done-{{todo.done}}" ng-click="change($index)" ng-bind="todo.text" ng-mouseover="showTitle($index)" title={{todo.warnTip}}></span>
+					</div>			
+				</li>
+			</ul>
+			<form ng-submit="add()" class="form-horizontal"><!-- 水平排列，输入框占10列，button占2列 -->
+				<div class="form-group">
+					<div class="col-sm-10">
+						<input type="text" ng-model="todoText" class="form-control">
+					</div>
+					<div class="col-sm-2">
+						<button class="btn btn-primary">添加</button>
+					</div>				
+				</div>			
+			</form>
+			<button ng-click="delete()" class="btn btn-danger btn-block">删除已完成的事项</button>
+			<div class="text-center">
+				<strong>总共有 <em>{{todos.length}}</em> 个事项</strong>
+				<strong>还有 <em>{{un()}}</em> 项未完成</strong>
+			</div>
+		</div>
+		
+	</div>
+	<script type="text/javascript">
+	var app=angular.module('todo',[]);
+	app.controller('todoList',['$scope',function($scope){
+		$scope.todos=[
+			{text:'切割图片',done:true,show:true},
+			{text:'编写图片代码',done:false,show:true},
+			{text:'编写js代码',done:false,show:true}
+		]
+		$scope.add=function(){
+			$scope.todos.push({text:$scope.todoText,done:false,show:true});
+			$scope.todoText="";//输入完成后将输入框置为空
+		}
+		$scope.delete=function(){
+			$scope.todos=$scope.todos.filter(function(item){
+				return !item.done;//过滤掉属性为done的元素
+			})
+		}
+		$scope.change=function(indexArg){
+			if(!$scope.todos[indexArg].done){//属性的done值未完成才能修改
+				$scope.todos.forEach(function(item,index){
+					if(index!==indexArg){
+						item.show=true;//将所点击的元素以外的show全置为true
+					}else{
+						item.show=false;
+					}
+				})
+			}
+		}
+		$scope.change2=function(indexArg){
+			$scope.todos[indexArg].show=true;//失去焦点时显示span元素
+		}
+		$scope.un=function(){//计算有多少项未完成事项，即统计done为false的项数
+			var count=0;
+			$scope.todos.forEach(function(item,index){
+				count=count+(item.done?0:1);
+			})
+			return count;
+		}
+		$scope.showTitle=function(indexArg){
+			if($scope.todos[indexArg].done){
+				$scope.todos[indexArg].warnTip="已完成的任务不能修改";
+			}else{
+				$scope.todos[indexArg].warnTip="未完成的任务可以修改";
+			}
+		}
+	}])
+	</script>
+</body>
+</html>
